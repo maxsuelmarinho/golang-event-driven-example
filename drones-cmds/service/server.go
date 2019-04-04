@@ -1,6 +1,7 @@
 package service
 
 import (
+	"fmt"
 	"log"
 	"os"
 	"strings"
@@ -12,7 +13,7 @@ import (
 	"github.com/unrolled/render"
 )
 
-func NewServer(appEnv *cfenv.App) *negroni.Negroni {
+func NewServer() *negroni.Negroni {
 	formatter := render.New(render.Options{
 		IndentJSON: true,
 	})
@@ -20,9 +21,9 @@ func NewServer(appEnv *cfenv.App) *negroni.Negroni {
 	n := negroni.Classic()
 	mx := mux.NewRouter()
 
-	positionDispatcher := buildDispatcher("positions", appEnv)
-	telemetryDispatcher := buildDispatcher("telemetry", appEnv)
-	alertDispatcher := buildDispatcher("alerts", appEnv)
+	positionDispatcher := buildDispatcher("positions")
+	telemetryDispatcher := buildDispatcher("telemetry")
+	alertDispatcher := buildDispatcher("alerts")
 
 	initRoutes(mx, formatter, telemetryDispatcher, alertDispatcher, positionDispatcher)
 
@@ -31,7 +32,7 @@ func NewServer(appEnv *cfenv.App) *negroni.Negroni {
 }
 
 func buildDispatcher(queueName string) queueDispatcher {
-	url := resolveAMQURL()
+	url := resolveAMQPURL()
 	if strings.Compare(url, "fake://foo") == 0 {
 		fmt.Printf("Building fake dispatcher for queue '%s'", queueName)
 		return fakes.NewFakeQueueDispatcher()
@@ -45,10 +46,10 @@ func initRoutes(mx *mux.Router, formatter *render.Render, telemetryDispatcher qu
 	mx.HandleFunc("/api/cmds/positions", addPositionHandler(formatter, positionDispatcher)).Methods("POST")
 }
 
-func resolveAMQURL() string {
+func resolveAMQPURL() string {
 	url := os.Getenv("AMQP_URL")
 	if url == "" {
-		fmt.Printt("Failed to detect URL for bound rabbit service. Falling back to in-memory fake.\n")
+		fmt.Printf("Failed to detect URL for bound rabbit service. Falling back to in-memory fake.\n")
 		return "fake://foo"
 	}
 
@@ -66,6 +67,7 @@ func createAMQPDispatcher(queueName string, url string) queueDispatcher {
 
 	q, err := ch.QueueDeclare(
 		queueName,
+		false,
 		false,
 		false,
 		false,

@@ -1,11 +1,13 @@
 package service
 
-import(
-	"fmt"
+import (
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"time"
+
+	dronescommon "github.com/maxsuelmarinho/golang-event-driven-example/drones-common"
 
 	"github.com/unrolled/render"
 )
@@ -26,11 +28,11 @@ func addTelemetryHandler(formatter *render.Render, dispatcher queueDispatcher) h
 		}
 
 		event := dronescommon.TelemetryUpdatedEvent{
-			DroneID: newTelemetryCommand.DroneID,
+			DroneID:          newTelemetryCommand.DroneID,
 			RemainingBattery: newTelemetryCommand.RemainingBattery,
-			Uptime: newTelemetryCommand.Uptime,
-			CoreTemp: newTelemetryCommand.CoreTemp,
-			ReceivedOn: time.Now().Unix(),
+			Uptime:           newTelemetryCommand.Uptime,
+			CoreTemp:         newTelemetryCommand.CoreTemp,
+			ReceivedOn:       time.Now().Unix(),
 		}
 		fmt.Printf("Dispatching telemetry event for drone %s\n", newTelemetryCommand.DroneID)
 		dispatcher.DispatchMessage(event)
@@ -54,10 +56,10 @@ func addAlertHandler(formatter *render.Render, dispatcher queueDispatcher) http.
 		}
 
 		event := dronescommon.AlertSignalledEvent{
-			DroneID: newAlertCommand.DroneID,
-			FaultCode: newAlertCommand.FaultCode,
+			DroneID:     newAlertCommand.DroneID,
+			FaultCode:   newAlertCommand.FaultCode,
 			Description: newAlertCommand.Description,
-			ReceivedOn: time.Now().Unix(),
+			ReceivedOn:  time.Now().Unix(),
 		}
 		fmt.Printf("Dispatching alert event for drone %s\n", newAlertCommand.DroneID)
 		dispatcher.DispatchMessage(event)
@@ -81,14 +83,13 @@ func addPositionHandler(formatter *render.Render, dispatcher queueDispatcher) ht
 		}
 
 		event := dronescommon.PositionChangedEvent{
-			DroneID: newPositionCommand.DroneID,
-			Longitude: newPositionCommand.Longitude,
-			Latitude: newPositionCommand.Latitude,
-			Altitude: newPositionCommand.Altitude,
-			CurrentSpeed: newPositionCommand.CurrentSpeed,
+			DroneID:         newPositionCommand.DroneID,
+			Longitude:       newPositionCommand.Longitude,
+			Latitude:        newPositionCommand.Latitude,
+			Altitude:        newPositionCommand.Altitude,
+			CurrentSpeed:    newPositionCommand.CurrentSpeed,
 			HeadingCardinal: newPositionCommand.HeadingCardinal,
-			Description: newPositionCommand.Description,
-			ReceivedOn: time.Now().Unix(),
+			ReceivedOn:      time.Now().Unix(),
 		}
 		fmt.Printf("Dispatching position event for drone %s\n", newPositionCommand.DroneID)
 		dispatcher.DispatchMessage(event)
