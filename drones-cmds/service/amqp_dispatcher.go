@@ -22,9 +22,9 @@ func NewAMQPDispatcher(publishChannel queuePublishableChannel, name string, mand
 }
 
 func (q *AmqpDispatcher) DispatchMessage(message interface{}) (err error) {
-	fmt.Printf("Dispatching message to queue %s\n", q.queueName)
+	fmt.Printf("Dispatching message to queue '%s'\n", q.queueName)
 	body, err := json.Marshal(message)
-	if err == nil {
+	if err != nil {
 		fmt.Printf("Failed to marshal message %v (%s)\n", message, err)
 		return err
 	}

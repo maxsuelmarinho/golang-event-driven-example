@@ -34,7 +34,7 @@ func NewServer() *negroni.Negroni {
 func buildDispatcher(queueName string) queueDispatcher {
 	url := resolveAMQPURL()
 	if strings.Compare(url, "fake://foo") == 0 {
-		fmt.Printf("Building fake dispatcher for queue '%s'", queueName)
+		fmt.Printf("Building fake dispatcher for queue '%s'\n", queueName)
 		return fakes.NewFakeQueueDispatcher()
 	}
 	return createAMQPDispatcher(queueName, url)
